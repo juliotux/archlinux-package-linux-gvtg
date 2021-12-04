@@ -1,0 +1,46 @@
+From 7f85c6d95365627b74943cf25e972fac563ab178 Mon Sep 17 00:00:00 2001
+From: Julian Stecklina <julian.stecklina@cyberus-technology.de>
+Date: Wed, 2 Jun 2021 15:30:36 +0300
+Subject: [PATCH 5/5] drm/i915/gvt: enter failsafe on hypervisor read failures
+
+In case the mediator is confused and asks to read outrageous guest
+physical addresses, the kernel log is spammed with the output of
+WARN_ON in gtt_get_entry64.
+
+Instead, warn only once in this case and send the vGPU into failsafe
+mode. This will crash the guest, but it is a better user experience
+than a hanging system.
+
+Signed-off-by: Julian Stecklina <julian.stecklina@cyberus-technology.de>
+---
+ drivers/gpu/drm/i915/gvt/gtt.c | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/i915/gvt/gtt.c b/drivers/gpu/drm/i915/gvt/gtt.c
+index a3a4305eda01..99b09ae5a2d4 100644
+--- a/drivers/gpu/drm/i915/gvt/gtt.c
++++ b/drivers/gpu/drm/i915/gvt/gtt.c
+@@ -315,8 +315,19 @@ static inline int gtt_get_entry64(void *pt,
+ 		ret = intel_gvt_hypervisor_read_gpa(vgpu, gpa +
+ 				(index << info->gtt_entry_size_shift),
+ 				&e->val64, 8);
+-		if (WARN_ON(ret))
++		/*
++		 * We end up in this error case, if we tried to read memory that
++		 * the hypervisor doesn't know about. Trying to continue usually
++		 * results in getting these errors over and over again and
++		 * results in follow-up weirdness in the GVT code. So instead
++		 * just nuke the guest and don't go down this rabbit hole.
++		 */
++		if (WARN_ONCE(ret,
++			      "failed to read from guest %#lx %#lx %#x, entering failsafe mode",
++			      gpa, index, info->gtt_entry_size_shift)) {
++			enter_failsafe_mode(vgpu, GVT_FAILSAFE_GUEST_ERR);
+ 			return ret;
++		}
+ 	} else if (!pt) {
+ 		e->val64 = read_pte64(vgpu->gvt->gt->ggtt, index);
+ 	} else {
+-- 
+2.31.1
+
