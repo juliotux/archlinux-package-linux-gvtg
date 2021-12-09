@@ -5,7 +5,7 @@ pkgver=5.15.7.arch1
 pkgrel=1
 pkgdesc='Linux'
 _srctag=v${pkgver%.*}-${pkgver##*.}
-_srcname=linux-${pkgver%.*}-${pkgver##*.}
+_srcname=archlinux-linux
 url="https://github.com/archlinux/linux/commits/$_srctag"
 arch=(x86_64)
 license=(GPL2)
@@ -16,7 +16,7 @@ makedepends=(
 )
 options=('!strip')
 source=(
-  "https://github.com/archlinux/linux/archive/refs/tags/$_srctag.tar.gz"
+  "$_srcname::git+https://github.com/archlinux/linux?signed#tag=$_srctag"
   config         # the main kernel config file
   drm-i915-Enable-atomics-in-L3-for-gen9.patch
   0005-drm-i915-gvt-enter-failsafe-on-hypervisor-read-failu.patch
