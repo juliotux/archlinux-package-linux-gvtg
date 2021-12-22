@@ -66,7 +66,7 @@ prepare() {
 build() {
   cd $_srcname
   make -j12 all
-  make -j12 htmldocs
+#  make -j12 htmldocs
 }
 
 _package() {
@@ -178,26 +178,26 @@ _package-headers() {
   ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase"
 }
 
-_package-docs() {
-  pkgdesc="Documentation for the $pkgdesc kernel"
+#_package-docs() {
+#  pkgdesc="Documentation for the $pkgdesc kernel"
 
-  cd $_srcname
-  local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
+#  cd $_srcname
+#  local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
 
-  echo "Installing documentation..."
-  local src dst
-  while read -rd '' src; do
-    dst="${src#Documentation/}"
-    dst="$builddir/Documentation/${dst#output/}"
-    install -Dm644 "$src" "$dst"
-  done < <(find Documentation -name '.*' -prune -o ! -type d -print0)
+#  echo "Installing documentation..."
+#  local src dst
+#  while read -rd '' src; do
+#    dst="${src#Documentation/}"
+#    dst="$builddir/Documentation/${dst#output/}"
+#    install -Dm644 "$src" "$dst"
+#  done < <(find Documentation -name '.*' -prune -o ! -type d -print0)
+#
+#  echo "Adding symlink..."
+#  mkdir -p "$pkgdir/usr/share/doc"
+#  ln -sr "$builddir/Documentation" "$pkgdir/usr/share/doc/$pkgbase"
+#}
 
-  echo "Adding symlink..."
-  mkdir -p "$pkgdir/usr/share/doc"
-  ln -sr "$builddir/Documentation" "$pkgdir/usr/share/doc/$pkgbase"
-}
-
-pkgname=("$pkgbase" "$pkgbase-headers" "$pkgbase-docs")
+pkgname=("$pkgbase" "$pkgbase-headers")
 for _p in "${pkgname[@]}"; do
   eval "package_$_p() {
     $(declare -f "_package${_p#$pkgbase}")
