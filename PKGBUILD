@@ -1,9 +1,9 @@
 # Maintainer: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
 
 pkgbase=linux-gvtg
-pkgver=5.16.5.arch1
+pkgver=5.16.9.arch1
 pkgrel=1
-pkgdesc='Linux'
+pkgdesc='Linux patched for Intel GVT-g'
 _srctag=v${pkgver%.*}-${pkgver##*.}
 _srcname=archlinux-linux
 url="https://github.com/archlinux/linux/commits/$_srctag"
